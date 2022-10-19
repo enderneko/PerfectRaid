@@ -59,7 +59,7 @@ function Frames:DONGLE_PROFILE_CREATED(event, db, addon, svname, profileKey)
 		sortType = "NAME",
 		deficit = 1,
 		colAnchor = "LEFT",
-		filter = "WARRIOR,DEATHKNIGHT,PRIEST,DRUID,SHAMAN,PALADIN,MONK,MAGE,ROGUE,WARLOCK,HUNTER,DEMONHUNTER",
+		filter = "WARRIOR,DEATHKNIGHT,PRIEST,DRUID,SHAMAN,PALADIN,MAGE,ROGUE,WARLOCK,HUNTER",
 		groupBy = "CLASS",
 		maxUnits = 25,
 	}
@@ -251,12 +251,12 @@ function Frames:CreateEditFrame(parent)
 	makeCheck(L["Druid"], "DRUID")
 	makeCheck(L["Shaman"], "SHAMAN")
 	makeCheck(L["Paladin"], "PALADIN")
-	makeCheck(L["Monk"], "MONK")
+	-- makeCheck(L["Monk"], "MONK")
 	makeCheck(L["Mage"], "MAGE")
 	makeCheck(L["Rogue"], "ROGUE")
 	makeCheck(L["Warlock"], "WARLOCK")
 	makeCheck(L["Hunter"], "HUNTER")
-    makeCheck(L["Demon Hunter"], "DEMONHUNTER")
+    -- makeCheck(L["Demon Hunter"], "DEMONHUNTER")
 	makeCheck(L["Group 1"], "1")
 	makeCheck(L["Group 2"], "2")
 	makeCheck(L["Group 3"], "3")
@@ -265,7 +265,7 @@ function Frames:CreateEditFrame(parent)
 	makeCheck(L["Group 6"], "6")
 	makeCheck(L["Group 7"], "7")
 	makeCheck(L["Group 8"], "8")
-	makeCheck(L["All Classes"], "WARRIOR,DEATHKNIGHT,PRIEST,DRUID,SHAMAN,PALADIN,MONK,MAGE,ROGUE,WARLOCK,HUNTER,DEMONHUNTER")
+	makeCheck(L["All Classes"], "WARRIOR,DEATHKNIGHT,PRIEST,DRUID,SHAMAN,PALADIN,MAGE,ROGUE,WARLOCK,HUNTER")
 	makeCheck(L["All Groups"], "1,2,3,4,5,6,7,8")
 	makeCheck(L["Main tanks"], "MAINTANK")
 	makeCheck(L["Main assists"], "MAINASSIST")
@@ -276,7 +276,7 @@ function Frames:CreateEditFrame(parent)
 		elseif math.fmod(idx - 1, 6) == 0 then
 			button:SetPoint("TOPLEFT", self.filters[idx-6], "BOTTOMLEFT", 0, 0)
 		else
-			button:SetPoint("LEFT", self.filters[idx-1], "RIGHT", 60, 0)
+			button:SetPoint("LEFT", self.filters[idx-1], "RIGHT", 75, 0)
 		end
 	end
 

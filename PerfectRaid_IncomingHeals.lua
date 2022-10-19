@@ -9,6 +9,7 @@
 
 
 local IncomingHeals = PerfectRaid:NewModule("PerfectRaid-IncomingHeals")
+local HealComm = LibStub("LibHealComm-4.0")
 
 local L = PerfectRaidLocals
 local utils, frames
@@ -39,11 +40,11 @@ end
 
 function IncomingHeals:EnableIncomingHeals(value)
 	if value then
-		self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHeals")
-		self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingHeals")
+		-- self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHeals")
+		-- self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingHeals")
 	else
-		self:UnregisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHeals")
-		self:UnregisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingHeals")
+		-- self:UnregisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHeals")
+		-- self:UnregisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingHeals")
 	end	
 end
 
@@ -53,8 +54,8 @@ function IncomingHeals:ConfigureButton( button )
 	local inchealbar = CreateFrame("StatusBar", nil, button)
 	button.incominghealsbar = inchealbar	
 	
-	local absorbbar = CreateFrame("StatusBar", nil, button)
-	button.absorbbar = absorbbar 
+	-- local absorbbar = CreateFrame("StatusBar", nil, button)
+	-- button.absorbbar = absorbbar 
 end
 
 function IncomingHeals:UpdateButtonLayout( button )
@@ -67,42 +68,44 @@ function IncomingHeals:UpdateButtonLayout( button )
 	button.incominghealsbar:SetStatusBarColor( 0.3, 0.5, 0.3 )
 	button.incominghealsbar:Hide()
 	
-	button.absorbbar:ClearAllPoints()
-	button.absorbbar:SetPoint("TOPLEFT", button.leftbox, "TOPRIGHT", 0, -1)
-	button.absorbbar:SetPoint("BOTTOMRIGHT", button.rightbox, "BOTTOMLEFT", 0, 1)
-	button.absorbbar:SetStatusBarTexture("Interface\\AddOns\\PerfectRaid\\images\\smooth")
-	button.absorbbar:SetFrameLevel( button.healthbar:GetFrameLevel()-2 )
-	button.absorbbar:SetStatusBarColor( 0, 0.651, 0.871 )
-	button.absorbbar:Hide()
+	-- button.absorbbar:ClearAllPoints()
+	-- button.absorbbar:SetPoint("TOPLEFT", button.leftbox, "TOPRIGHT", 0, -1)
+	-- button.absorbbar:SetPoint("BOTTOMRIGHT", button.rightbox, "BOTTOMLEFT", 0, 1)
+	-- button.absorbbar:SetStatusBarTexture("Interface\\AddOns\\PerfectRaid\\images\\smooth")
+	-- button.absorbbar:SetFrameLevel( button.healthbar:GetFrameLevel()-2 )
+	-- button.absorbbar:SetStatusBarColor( 0, 0.651, 0.871 )
+	-- button.absorbbar:Hide()
 	
 end
 
-function IncomingHeals:UpdateIncomingHeals( event, target )
+function IncomingHeals:UpdateIncomingHeals( event, target, guid)
 
 	-- not the right unit
 	if target == "target" then return end
 	
 	local health = UnitHealth(target)
 	local maxhealth = UnitHealthMax(target)
-	local healinc = UnitGetIncomingHeals(target)
-	local absorbinc = UnitGetTotalAbsorbs(target)
-
+	local healinc = 0
+	
 	-- not correct healinc or health
-	if health == null or healinc == null then return end
+	if not health then return end
+
+	if UnitGUID(target) == guid then 
+		local modifier = HealComm:GetHealModifier(guid) or 1
+		healinc = (HealComm:GetHealAmount(guid, HealComm.CASTED_HEALS) or 0) * modifier
+		-- NOTE: hots within 3 seconds
+		hot = (HealComm:GetHealAmount(guid, HealComm.OVERTIME_AND_BOMB_HEALS, GetTime()+3) or 0) * modifier
+		healinc = healinc + hot
+	end
 	
 	local healthincsum = health + healinc
-	local healthabsorbsum = health + healinc + absorbinc
 	
 	-- adjust healthsum to maxhealth
 	if healthincsum > maxhealth then healthincsum = maxhealth end
-	if healthabsorbsum > maxhealth then healthabsorbsum = maxhealth end
 	
 	for unit, tbl in pairs(frames) do
-
 		if UnitIsUnit( target, unit ) then
-				
 			for frame in pairs(frames[unit]) do	
-			
 				-- heal inc
 				if healinc == 0 or health == maxhealth then				
 					frame.incominghealsbar:Hide()
@@ -111,16 +114,6 @@ function IncomingHeals:UpdateIncomingHeals( event, target )
 					frame.incominghealsbar:SetValue(healthincsum)
 					frame.incominghealsbar:Show()
 				end
-				
-				-- absorb inc
-				if absorbinc == 0 or health == maxhealth then				
-					frame.absorbbar:Hide()
-				else
-					frame.absorbbar:SetMinMaxValues(0, maxhealth)
-					frame.absorbbar:SetValue(healthabsorbsum)
-					frame.absorbbar:Show()
-				end
-				
 			end
 			
 		end			
@@ -128,3 +121,26 @@ function IncomingHeals:UpdateIncomingHeals( event, target )
 	
 	
 end
+
+-------------------------------------------------
+-- LibHealComm
+-------------------------------------------------
+PerfectRaid.HealComm = {}
+local function HealComm_UpdateHealPrediction(_, event, casterGUID, spellID, healType, endTime, ...)
+    -- update incomingHeal
+    for i = 1, select("#", ...) do
+		local guid = select(i, ...)
+        local unit = PerfectRaid.guidToUnit[guid]
+        if unit then
+			-- print(event, casterGUID, spellID, healType, endTime, ...)
+            IncomingHeals:UpdateIncomingHeals(event, unit, guid)
+        end
+    end
+end
+PerfectRaid.HealComm.HealComm_UpdateHealPrediction = HealComm_UpdateHealPrediction
+HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealStarted", "HealComm_UpdateHealPrediction")
+HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealUpdated", "HealComm_UpdateHealPrediction")
+HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealStopped", "HealComm_UpdateHealPrediction")
+HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealDelayed", "HealComm_UpdateHealPrediction")
+HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_ModifierChanged", "HealComm_UpdateHealPrediction")
+HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_GUIDDisappeared", "HealComm_UpdateHealPrediction")

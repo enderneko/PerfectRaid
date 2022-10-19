@@ -91,6 +91,7 @@ function PerfectRaid:Enable()
 	self:RegisterEvent("GROUP_ROSTER_UPDATE")
 	self:RegisterEvent("UNIT_DISPLAYPOWER")
 	self:RegisterEvent("UNIT_HEALTH")
+	self:RegisterEvent("UNIT_HEALTH_FREQUENT")
 	self:RegisterEvent("UNIT_MAXHEALTH")
 	self:RegisterEvent("UNIT_POWER_UPDATE")
 	self:RegisterEvent("UNIT_MAXPOWER", "UNIT_MAXPOWER")
@@ -210,7 +211,6 @@ function PerfectRaid:CreateRaidFrame(idx)
 				bottom = 5
 			},
 		}
-
 	end
 
 	-- Position backdrop
@@ -290,7 +290,14 @@ function PerfectRaid:GetColoredName(unit, idx)
 		group = string.format("%s-", select(3, GetRaidRosterInfo(idx)))
 	end
 
-	return string.format("%s|cFF%02x%02x%02x%s|r", group, color.r*255, color.g*255, color.b*255, UnitName(unit) or "Unknown")
+	local name = UnitName(unit)
+	if string.len(name) == string.utf8len(name) then -- en
+		name = string.utf8sub(name, 1, 8)
+	else -- cn
+		name = string.utf8sub(name, 1, 4)
+	end
+
+	return string.format("%s|cFF%02x%02x%02x%s|r", group, color.r*255, color.g*255, color.b*255, name or _G.UNKNOWNOBJECT)
 end
 
 function PerfectRaid:CHAT_MSG_SYSTEM(event, msg)
@@ -410,6 +417,10 @@ function PerfectRaid:UNIT_HEALTH(event, unit)
 			end
 		end
 	end
+end
+
+function PerfectRaid:UNIT_HEALTH_FREQUENT(event, unit)
+	PerfectRaid:UNIT_HEALTH(event, unit)
 end
 
 function PerfectRaid:UNIT_POWER_UPDATE(event, unit, powerType)
@@ -699,6 +710,7 @@ function PerfectRaid:UpdateButtonLayout(button)
 		button.name:SetPoint("LEFT", button.leftbox, "LEFT", 0, 0)
 		button.name:SetJustifyH("RIGHT")
 	end
+	button.name:SetWordWrap(false)
 
 	for name,module in self:IterateModules() do
 		if type(module.UpdateButtonLayout) == "function" then
@@ -707,6 +719,7 @@ function PerfectRaid:UpdateButtonLayout(button)
 	end
 end
 
+PerfectRaid.guidToUnit = {}
 function PerfectRaid:GROUP_ROSTER_UPDATE()
 	if self.moving then
 		self.moving:StopMovingOrSizing()
@@ -725,6 +738,42 @@ function PerfectRaid:GROUP_ROSTER_UPDATE()
 	if not InCombatLockdown() then
 		PerfectRaid:UpdateRaidFrames()
 	end
+
+	-- update guid <-> unit
+	wipe(PerfectRaid.guidToUnit)
+	if IsInRaid() then
+        for i = 1, GetNumGroupMembers() do
+            local playerGUID = UnitGUID("raid"..i)
+            if playerGUID then
+                PerfectRaid.guidToUnit[playerGUID] = "raid"..i
+            end
+        end
+
+    elseif IsInGroup() then
+        PerfectRaid.guidToUnit[UnitGUID("player")] = "player"
+        if UnitGUID("pet") then
+            PerfectRaid.guidToUnit[UnitGUID("pet")] = "pet"
+        end
+        for i = 1, 4 do
+            local playerGUID = UnitGUID("party"..i)
+            if playerGUID then
+                PerfectRaid.guidToUnit[playerGUID] = "party"..i
+            else
+                break
+            end
+
+            local petGUID = UnitGUID("partypet"..i)
+            if petGUID then
+                PerfectRaid.guidToUnit[petGUID] = "partypet"..i
+            end
+        end
+
+    else
+        PerfectRaid.guidToUnit[UnitGUID("player")] = "player"
+        if UnitGUID("pet") then
+            PerfectRaid.guidToUnit[UnitGUID("pet")] = "pet"
+        end
+    end
  end
 
 function PerfectRaid:UNIT_DISPLAYPOWER(event, unit)
@@ -751,6 +800,7 @@ function PerfectRaid:UNIT_DISPLAYPOWER(event, unit)
 end
 
 local updateMethods = {
+	"GROUP_ROSTER_UPDATE",
     "UNIT_DISPLAYPOWER",
     "UNIT_HEALTH",
     "UNIT_MAXHEALTH",

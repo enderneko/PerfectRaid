@@ -104,7 +104,7 @@ function Config:CreateOptions(opt)
 		UIDropDownMenu_SetSelectedValue(iconPositionDropDown,"LNAME")
 	end)
 	iconPositionDropDown:SetWidth(200);
-	iconPositionDropDown:SetPoint("LEFT", check, "RIGHT", 100, 0)
+	iconPositionDropDown:SetPoint("LEFT", check, "RIGHT", 120, 0)
 	options.iconposition = iconPositionDropDown;
 	
 	local check = CreateFrame("CheckButton", "PRConfig_IncomingHeals", options, "PRCheckTemplate")
