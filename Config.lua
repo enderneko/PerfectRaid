@@ -112,7 +112,7 @@ options.args.highlight = {
 				},
 			},
 		},
-	},
+	}, 
 } -- end highlight
 
 options.args.range = {
@@ -146,7 +146,7 @@ local function getFrameArgs()
 			type = "description",
 			name = L["From here you can configure the options for a display frame, including what units it displays and other options that change the look, feel and operation of the frame."],
 		},
-
+		
 		filters = {
 			type = "group",
 			name = L["Filters"],
@@ -168,7 +168,6 @@ local function getFrameArgs()
 						ROGUE = L["Rogue"],
 						WARLOCK = L["Warlock"],
 						HUNTER = L["Hunter"],
-                        DEMONHUNTER = L["Demon Hunter"],
 					}
 				},
 				groups = {
@@ -317,7 +316,7 @@ local function getFrameArgs()
 						},
 					},
 				}, -- end sorting
-			},
+			}, 
 		}, -- end groupsort
 
 		columns = {
@@ -340,7 +339,7 @@ local function getFrameArgs()
 					type = "input",
 					name = L["Number of units per column"],
 					validate = function(info, value)
-						if value and not tonumber(value) then
+						if value and not tonumber(value) then 
 							return L["Number of units per column must be a number, or nil"]
 						end
 						return true
