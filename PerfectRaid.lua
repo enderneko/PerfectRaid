@@ -245,7 +245,7 @@ function PerfectRaid:CreateRaidFrame(idx)
 	frame:SetAttribute("groupBy", options.groupBy)
 	local groupOrder
 	if options.groupBy == "CLASS" then
-		groupOrder="WARRIOR,DEATHKNIGHT,DEMONHUNTER,MONK,PALADIN,ROGUE,DRUID,SHAMAN,PRIEST,MAGE,WARLOCK,HUNTER"
+		groupOrder="WARRIOR,DEATHKNIGHT,PALADIN,ROGUE,DRUID,SHAMAN,PRIEST,MAGE,WARLOCK,HUNTER"
 	elseif options.groupBy == "GROUP" then
 		groupOrder="1,2,3,4,5,6,7,8"
 	end
@@ -290,9 +290,9 @@ function PerfectRaid:GetColoredName(unit, idx)
 		group = string.format("%s-", select(3, GetRaidRosterInfo(idx)))
 	end
 
-	local name = UnitName(unit)
-	if string.len(name) == string.utf8len(name) then -- en
-		name = string.utf8sub(name, 1, 8)
+	local name = UnitName(unit) or ""
+	if string.utf8len(name) == string.utf8len(name) then -- en
+		name = string.utf8sub(name, 1, 6)
 	else -- cn
 		name = string.utf8sub(name, 1, 4)
 	end

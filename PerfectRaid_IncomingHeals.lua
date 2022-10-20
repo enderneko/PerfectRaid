@@ -42,9 +42,16 @@ function IncomingHeals:EnableIncomingHeals(value)
 	if value then
 		-- self:RegisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHeals")
 		-- self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingHeals")
+		HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealStarted", "HealComm_UpdateHealPrediction")
+		HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealUpdated", "HealComm_UpdateHealPrediction")
+		HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealStopped", "HealComm_UpdateHealPrediction")
+		HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealDelayed", "HealComm_UpdateHealPrediction")
+		HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_ModifierChanged", "HealComm_UpdateHealPrediction")
+		HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_GUIDDisappeared", "HealComm_UpdateHealPrediction")
 	else
 		-- self:UnregisterEvent("UNIT_HEAL_PREDICTION", "UpdateIncomingHeals")
 		-- self:UnregisterEvent("UNIT_ABSORB_AMOUNT_CHANGED", "UpdateIncomingHeals")
+		HealComm.UnregisterAllCallbacks(PerfectRaid.HealComm)
 	end	
 end
 
@@ -80,8 +87,7 @@ end
 
 function IncomingHeals:UpdateIncomingHeals( event, target, guid)
 
-	-- not the right unit
-	if target == "target" then return end
+	if UnitGUID(target) ~= guid then return end
 	
 	local health = UnitHealth(target)
 	local maxhealth = UnitHealthMax(target)
@@ -90,13 +96,11 @@ function IncomingHeals:UpdateIncomingHeals( event, target, guid)
 	-- not correct healinc or health
 	if not health then return end
 
-	if UnitGUID(target) == guid then 
-		local modifier = HealComm:GetHealModifier(guid) or 1
-		healinc = (HealComm:GetHealAmount(guid, HealComm.CASTED_HEALS) or 0) * modifier
-		-- NOTE: hots within 3 seconds
-		hot = (HealComm:GetHealAmount(guid, HealComm.OVERTIME_AND_BOMB_HEALS, GetTime()+3) or 0) * modifier
-		healinc = healinc + hot
-	end
+	local modifier = HealComm:GetHealModifier(guid) or 1
+	healinc = (HealComm:GetHealAmount(guid, HealComm.CASTED_HEALS) or 0) * modifier
+	-- NOTE: hots within 3 seconds
+	hot = (HealComm:GetHealAmount(guid, HealComm.OVERTIME_AND_BOMB_HEALS, GetTime()+3) or 0) * modifier
+	healinc = healinc + hot
 	
 	local healthincsum = health + healinc
 	
@@ -138,9 +142,3 @@ local function HealComm_UpdateHealPrediction(_, event, casterGUID, spellID, heal
     end
 end
 PerfectRaid.HealComm.HealComm_UpdateHealPrediction = HealComm_UpdateHealPrediction
-HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealStarted", "HealComm_UpdateHealPrediction")
-HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealUpdated", "HealComm_UpdateHealPrediction")
-HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealStopped", "HealComm_UpdateHealPrediction")
-HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_HealDelayed", "HealComm_UpdateHealPrediction")
-HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_ModifierChanged", "HealComm_UpdateHealPrediction")
-HealComm.RegisterCallback(PerfectRaid.HealComm, "HealComm_GUIDDisappeared", "HealComm_UpdateHealPrediction")
