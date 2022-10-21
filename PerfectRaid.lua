@@ -458,7 +458,30 @@ function PerfectRaid:UNIT_MAXHEALTH(event, unit)
 	end
 end
 
+local function UpdateTitleVisibility(frame)
+	-- Hide any empty parents
+	local parent = frame:GetParent()
+	local num = parent:GetNumChildren()
+	local visible
+	for i=1,num do
+		local button = parent:GetAttribute("child"..i)
+		if button and button:IsShown() then
+			visible = true
+			break
+		end
+	end
+
+	local method
+	if visible then method = "Show" else method = "Hide" end
+
+	if parent.title then
+		parent.title[method](parent.title)
+	end
+end
+
 local function OnShow(frame)
+	UpdateTitleVisibility(frame)
+
 	local self = PerfectRaid
 	local unit = frame:GetAttribute("unit")
 	if unit == nil then
@@ -476,7 +499,9 @@ local function OnShow(frame)
 end
 
 local function OnHide(frame)
-    if frame == PerfectRaid.movingButton then
+	UpdateTitleVisibility(frame)
+    
+	if frame == PerfectRaid.movingButton then
         PerfectRaid.moving:StopMovingOrSizing()
     end
 end
@@ -562,26 +587,6 @@ function OnAttributeChanged(frame, name, value)
 		self:UNIT_HEALTH(nil, unit)
 		self:UNIT_POWER_UPDATE(nil, unit)
 		self:TriggerMessage("PERFECTRAID_FRAME_LAYOUT_CHANGED");
-	end
-
-	-- Hide any empty parents
-
-	local parent = frame:GetParent()
-	if value == nil then
-		local num = parent:GetNumChildren()
-		local visible = nil
-		for i=1,num do
-			local button = parent:GetAttribute("child"..i)
-			if button and button:IsShown() then visible = true end
-		end
-		local method
-		if visible then method = "Show" else method = "Hide" end
-
-		if parent.title then
-			parent.title[method](parent.title)
-		end
-	else
-		parent.title:Show()
 	end
 end
 
