@@ -1,6 +1,6 @@
 ## Interface: 30400
 ## Title: PerfectRaid
-## Version: r2
+## Version: r4
 ## Author: Cladhaire (modified by enderneko)
 ## Notes: Simply powerful raid and party frames
 ## SavedVariables: PerfectRaidDB

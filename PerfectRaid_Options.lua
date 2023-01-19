@@ -228,13 +228,13 @@ function Options:CreateListFrame(parent, num)
 	texture:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
 	texture:SetPoint("TOPLEFT", scrollframe, "TOPRIGHT", 14, 0)
 	texture:SetPoint("BOTTOMRIGHT", scrollframe, "BOTTOMRIGHT", 23, 0)
-	texture:SetGradientAlpha("HORIZONTAL", 0.5, 0.25, 0.05, 0, 0.15,0.15, 0.15, 1)
+	texture:SetGradient("HORIZONTAL", CreateColor(0.5, 0.25, 0.05, 0), CreateColor(0.15,0.15, 0.15, 1))
 
 	local texture = scrollframe:CreateTexture(nil, "BACKGROUND")
 	texture:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
 	texture:SetPoint("TOPLEFT", scrollframe, "TOPRIGHT", 4, 0)
 	texture:SetPoint("BOTTOMRIGHT", scrollframe, "BOTTOMRIGHT", 14, 0)
-	texture:SetGradientAlpha("HORIZONTAL", 0.15, 0.15, 0.15, 0.15, 1, 0.5, 0.25, 0.05, 0)
+	texture:SetGradient("HORIZONTAL", CreateColor(0.15, 0.15, 0.15, 1), CreateColor(0.5, 0.25, 0.05, 0))
 
 	scrollframe.entries = entries
 	return scrollframe
