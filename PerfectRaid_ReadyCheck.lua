@@ -104,11 +104,12 @@ function ReadyCheck:UpdateReadyCheck( event, target )
 					frame.readycheck:SetScript("OnUpdate", function(self, elapsed) 
 	
 						self.elapsed = self.elapsed - elapsed
-						self:SetAlpha( self.elapsed / ReadyCheck.fadeDuration )					
 						
 						if self.elapsed <= 0 then
 							self:Hide()
 							self:SetScript("OnUpdate", nil)
+						else
+							self:SetAlpha( self.elapsed / ReadyCheck.fadeDuration )					
 						end
 					end)
 					
