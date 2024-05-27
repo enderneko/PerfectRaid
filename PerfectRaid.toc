@@ -1,6 +1,6 @@
-## Interface: 30401
+## Interface: 40400
 ## Title: PerfectRaid
-## Version: r5
+## Version: r6
 ## Author: Cladhaire (modified by enderneko)
 ## Notes: Simply powerful raid and party frames
 ## SavedVariables: PerfectRaidDB
@@ -9,7 +9,6 @@
 libs\utf8.lua
 libs\LibStub\LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
-libs\LibHealComm-4.0\LibHealComm-4.0.xml
 
 Dongle.lua
 
